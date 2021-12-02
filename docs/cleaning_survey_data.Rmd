@@ -2,10 +2,7 @@
 title: "Reformating the data before analysis"
 author: "Surakshya Dhakal"
 date: "11/30/2021"
-output: 
-  html_document:
-    keep_md: true
-    df_print: paged
+output: rmarkdown::github_document
 ---
 
 

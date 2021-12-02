@@ -1,26 +1,22 @@
----
-title: "Reformating the data before analysis"
-author: "Surakshya Dhakal"
-date: "11/30/2021"
-output: 
-  html_document:
-    keep_md: true
-    df_print: paged
----
-
+Reformating the data before analysis
+================
+Surakshya Dhakal
+11/30/2021
 
 # Load libraries
 
-```r
+``` r
 if(!require("pacman")) install.packages("pacman")
 pacman::p_load(dplyr, tidyr, pander, RColorBrewer)
 ```
 
-
 ## Read in data
-In this case, the data was collected for a project on the use of mobile money services and the experiences of mobile money customers in three districts of a country in Africa.
 
-```r
+In this case, the data was collected for a project on the use of mobile
+money services and the experiences of mobile money customers in three
+districts of a country in Africa.
+
+``` r
 # Read in mobilemoney_data.csv. 
 mm_df <- read.csv("../data/mobilemoney_data.csv", na.strings=c("","NA"))
 
@@ -29,13 +25,14 @@ mm_df <- read.csv("../data/mobilemoney_data.csv", na.strings=c("","NA"))
 # head(mm_df)
 ```
 
+## Subset and format the data
 
-## Subset and format the data 
-Since the data is not in the format required for analysis, it needs to be cleaned.
+Since the data is not in the format required for analysis, it needs to
+be cleaned.
 
 **Format the data so that there is one observation per participant.**
 
-```r
+``` r
 # Convert data from long-form to wide-form
 # Accounts are listed by Household ID (hhid), i.e, the participant.
 # The first two columns aren't necessary for the analysis. Remove.
@@ -50,17 +47,14 @@ mm_wide <- mm_df1 %>% pivot_wider(id_cols = c(1, 4:27),
                                   names_from = account_type, values_from = account_type)
 ```
 
-
-
-```r
+``` r
 # Make a copy of mm_wide
 mm_wide_copy <- mm_wide
 ```
 
-
 **Split character columns into multiple columns**
 
-```r
+``` r
 # Separate district column
 # Example of an entry: District_A
 
@@ -72,15 +66,15 @@ rm(sep_1)
 head(mm_wide[30:31])   # The new columns are put at the end of the dataframe
 ```
 
-<div data-pagedtable="false">
-  <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["admin_level"],"name":[1],"type":["chr"],"align":["left"]},{"label":["district_code"],"name":[2],"type":["chr"],"align":["left"]}],"data":[{"1":"District","2":"A","_rn_":"1"},{"1":"District","2":"B","_rn_":"2"},{"1":"District","2":"A","_rn_":"3"},{"1":"District","2":"A","_rn_":"4"},{"1":"District","2":"C","_rn_":"5"},{"1":"District","2":"B","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
+    ##   admin_level district_code
+    ## 1    District             A
+    ## 2    District             B
+    ## 3    District             A
+    ## 4    District             A
+    ## 5    District             C
+    ## 6    District             B
 
-
-
-```r
+``` r
 # Separate highest_grade_completed column
 # Example of an entry: primary 6
 # Instead of using do.call and strsplit, use "separate" function
@@ -89,28 +83,28 @@ mm_wide <- separate(mm_wide, 6, into = c("education", "highest_grade"), sep = " 
 head(mm_wide[6:7], 6)   # New columns are created replacing and next to the old
 ```
 
-<div data-pagedtable="false">
-  <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["education"],"name":[1],"type":["chr"],"align":["left"]},{"label":["highest_grade"],"name":[2],"type":["chr"],"align":["left"]}],"data":[{"1":"primary","2":"6","_rn_":"1"},{"1":"primary","2":"3","_rn_":"2"},{"1":"secondary","2":"6","_rn_":"3"},{"1":"primary","2":"6","_rn_":"4"},{"1":"primary","2":"6","_rn_":"5"},{"1":"primary","2":"3","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
+    ##   education highest_grade
+    ## 1   primary             6
+    ## 2   primary             3
+    ## 3 secondary             6
+    ## 4   primary             6
+    ## 5   primary             6
+    ## 6   primary             3
 
-
-
-```r
+``` r
 # Another contains multiple company names in the same column
 head(mm_wide[11])
 ```
 
-<div data-pagedtable="false">
-  <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["mm_account_telco"],"name":[1],"type":["chr"],"align":["left"]}],"data":[{"1":"Company_A Company_B","_rn_":"1"},{"1":"NA","_rn_":"2"},{"1":"Company_A","_rn_":"3"},{"1":"Company_A","_rn_":"4"},{"1":"Company_B","_rn_":"5"},{"1":"NA","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
+    ##      mm_account_telco
+    ## 1 Company_A Company_B
+    ## 2                <NA>
+    ## 3           Company_A
+    ## 4           Company_A
+    ## 5           Company_B
+    ## 6                <NA>
 
-
-
-```r
+``` r
 # Extract the companies and put each in their own column
 z <- separate(mm_wide, 11, into = c("tmp1", "tmp2", "tmp3"), sep = " ")
 mm_wide$Company_A <- ifelse(z$tmp1 == "Company_A", 1, NA)
@@ -124,10 +118,12 @@ rm(z)   # Remove the temporary dataframe
 head(mm_wide[32:34])
 ```
 
-<div data-pagedtable="false">
-  <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Company_A"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Company_B"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Company_C"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"1","3":"NA","_rn_":"1"},{"1":"NA","2":"NA","3":"NA","_rn_":"2"},{"1":"1","2":"NA","3":"NA","_rn_":"3"},{"1":"1","2":"NA","3":"NA","_rn_":"4"},{"1":"NA","2":"1","3":"NA","_rn_":"5"},{"1":"NA","2":"NA","3":"NA","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
-  </script>
-</div>
+    ##   Company_A Company_B Company_C
+    ## 1         1         1        NA
+    ## 2        NA        NA        NA
+    ## 3         1        NA        NA
+    ## 4         1        NA        NA
+    ## 5        NA         1        NA
+    ## 6        NA        NA        NA
 
 The dataset is now ready for statistical analysis.
