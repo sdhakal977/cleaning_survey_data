@@ -1,0 +1,11 @@
+name: "Cleaning Survey Data"
+navbar:
+  title: "Cleaning Survey Data"
+  left:
+   - text: "Home"
+      href: index.html
+  right:
+   - icon: fa-github fa-lg
+      href: https://github.com/
+	
+   
