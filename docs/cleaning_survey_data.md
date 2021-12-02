@@ -3,8 +3,6 @@ Reformating the data before analysis
 Surakshya Dhakal
 11/30/2021
 
-# Making a change to test version control
-
 # Load libraries
 
 ``` r
