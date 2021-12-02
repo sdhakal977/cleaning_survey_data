@@ -2,10 +2,8 @@
 title: "Reformating the data before analysis"
 author: "Surakshya Dhakal"
 date: "11/30/2021"
-output:
-  html_document: default
-  pdf_document: default
-keep_md: yes
+output: 
+  html_document
 ---
 
 
