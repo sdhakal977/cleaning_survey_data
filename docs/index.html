@@ -170,6 +170,98 @@ pre code {
 
 <hr />
 <p>Cleaning survey data</p>
+<div id="load-libraries" class="section level1">
+<h1>Load libraries</h1>
+<pre class="r"><code>if(!require(&quot;pacman&quot;)) install.packages(&quot;pacman&quot;)
+pacman::p_load(dplyr, tidyr, pander, RColorBrewer)</code></pre>
+<div id="read-in-data" class="section level2">
+<h2>Read in data</h2>
+<p>In this case, the data was collected for a project on the use of mobile money services and the experiences of mobile money customers in three districts of a country in Africa.</p>
+<pre class="r"><code># Read in mobilemoney_data.csv. 
+mm_df &lt;- read.csv(&quot;../data/mobilemoney_data.csv&quot;, na.strings=c(&quot;&quot;,&quot;NA&quot;))
+
+# Check the data
+# str(mm_df)   # too long to show
+# head(mm_df)</code></pre>
+</div>
+<div id="subset-and-format-the-data" class="section level2">
+<h2>Subset and format the data</h2>
+<p>Since the data is not in the format required for analysis, it needs to be cleaned.</p>
+<p><strong>Format the data so that there is one observation per participant.</strong></p>
+<pre class="r"><code># Convert data from long-form to wide-form
+# Accounts are listed by Household ID (hhid), i.e, the participant.
+# The first two columns aren&#39;t necessary for the analysis. Remove.
+# Since there are 6 unique account_types,...
+# ... the conversion will add 6 columns at the end of the data frame.
+# Ignore account_num. 
+# References https://tidyr.tidyverse.org/reference/pivot_wider.html
+
+mm_df1 &lt;- mm_df[3:29]   
+
+mm_wide &lt;- mm_df1 %&gt;% pivot_wider(id_cols = c(1, 4:27), 
+                                  names_from = account_type, values_from = account_type)</code></pre>
+<pre class="r"><code># Make a copy of mm_wide
+mm_wide_copy &lt;- mm_wide</code></pre>
+<p><strong>Split character columns into multiple columns</strong></p>
+<pre class="r"><code># Separate district column
+# Example of an entry: District_A
+
+sep_1 &lt;- data.frame(do.call(&quot;rbind&quot;, strsplit(mm_wide$district, &quot;_&quot;, fixed = TRUE)))
+names(sep_1) &lt;- c(&quot;admin_level&quot;, &quot;district_code&quot;)
+mm_wide &lt;- cbind(mm_wide, sep_1)[-c(2:3)]
+rm(sep_1)
+
+head(mm_wide[30:31])   # The new columns are put at the end of the dataframe</code></pre>
+<pre><code>##   admin_level district_code
+## 1    District             A
+## 2    District             B
+## 3    District             A
+## 4    District             A
+## 5    District             C
+## 6    District             B</code></pre>
+<pre class="r"><code># Separate highest_grade_completed column
+# Example of an entry: primary 6
+# Instead of using do.call and strsplit, use &quot;separate&quot; function
+
+mm_wide &lt;- separate(mm_wide, 6, into = c(&quot;education&quot;, &quot;highest_grade&quot;), sep = &quot; &quot;)
+head(mm_wide[6:7], 6)   # New columns are created replacing and next to the old</code></pre>
+<pre><code>##   education highest_grade
+## 1   primary             6
+## 2   primary             3
+## 3 secondary             6
+## 4   primary             6
+## 5   primary             6
+## 6   primary             3</code></pre>
+<pre class="r"><code># Another contains multiple company names in the same column
+head(mm_wide[11])</code></pre>
+<pre><code>##      mm_account_telco
+## 1 Company_A Company_B
+## 2                &lt;NA&gt;
+## 3           Company_A
+## 4           Company_A
+## 5           Company_B
+## 6                &lt;NA&gt;</code></pre>
+<pre class="r"><code># Extract the companies and put each in their own column
+z &lt;- separate(mm_wide, 11, into = c(&quot;tmp1&quot;, &quot;tmp2&quot;, &quot;tmp3&quot;), sep = &quot; &quot;)
+mm_wide$Company_A &lt;- ifelse(z$tmp1 == &quot;Company_A&quot;, 1, NA)
+mm_wide$Company_B &lt;- ifelse(z$tmp1 == &quot;Company_B&quot; | z$tmp2 == &quot;Company_B&quot;, 1, NA)
+mm_wide$Company_C &lt;- ifelse(z$tmp1 == &quot;Company_C&quot; | 
+                              z$tmp2 == &quot;Company_C&quot; | 
+                              z$tmp3 == &quot;Company_C&quot;, 1, NA)
+
+mm_wide &lt;- mm_wide[-11]   # Remove the old column
+rm(z)   # Remove the temporary dataframe
+head(mm_wide[32:34])</code></pre>
+<pre><code>##   Company_A Company_B Company_C
+## 1         1         1        NA
+## 2        NA        NA        NA
+## 3         1        NA        NA
+## 4         1        NA        NA
+## 5        NA         1        NA
+## 6        NA        NA        NA</code></pre>
+<p>The dataset is now ready for statistical analysis.</p>
+</div>
+</div>
 
 
 
